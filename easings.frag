@@ -6,8 +6,11 @@ precision mediump float;
 #define HALF_PI 1.5707963267948966
 
 uniform vec2 u_resolution;
-uniform float u_time;
 uniform vec2 u_mouse;
+uniform float u_time;
+
+// Robert Penner's easing functions in GLSL
+// https://github.com/stackgl/glsl-easings
 
 float linear(float t){
     return t;
@@ -129,13 +132,13 @@ float bounceOut(float t){
     const float a=4./11.;
     const float b=8./11.;
     const float c=9./10.;
-    
+
     const float ca=4356./361.;
     const float cb=35442./1805.;
     const float cc=16061./1805.;
-    
+
     float t2=t*t;
-    
+
     return t<a
     ?7.5625*t2
     :t<b
@@ -168,10 +171,28 @@ float backInOut(float t){
     float f=t<.5
     ?2.*t
     :1.-(2.*t-1.);
-    
+
     float g=pow(f,3.)-f*sin(f*PI);
-    
+
     return t<.5
     ?.5*g
     :.5*(1.-g)+.5;
+}
+
+float plot(vec2 st,float pct){
+    return smoothstep(pct-.01,pct,st.y)-
+    smoothstep(pct,pct+.01,st.y);
+}
+
+void main(){
+    vec3 colorA=vec3(.149,.141,.912);
+    vec3 colorB=vec3(1.,.833,.224);
+    vec3 color;
+
+    float t=u_time*.5;
+    float pct=cubicInOut(abs(fract(t)*2.-1.));
+
+    color = mix(colorA, colorB, pct);
+
+    gl_FragColor=vec4(vec3(mix(colorA,colorB,pct)),1.);
 }
